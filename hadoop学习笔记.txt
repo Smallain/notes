@@ -1,0 +1,10 @@
+hadoop
+
+显示当前hadoop的目录结构
+hdfs fs -ls /
+
+在指定的hadoop目录中新建一个文件夹
+hdfs fs -mkdir /user/wuyuhang
+
+将本地的file推入到指定的hadoop目录下
+hdfs fs -put file /user/wuyuhang/
