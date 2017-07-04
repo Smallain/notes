@@ -107,5 +107,68 @@ hdfs namenode -format
 ./start-yarn.sh
 
 7.启动spark，以client模式连接yarn
-
+命令需要在家目录下执行
 spark-shell --master yarn --deploy-mode client
+
+------------------------------------------------------------------------------------------------
+从hdfs集群中获取数据集返回RDD
+val rawblocks = sc.txtFile("hdfs://localhost:9000/user/hadoop/linkage")
+
+获取数据集的前10行，返回Array[String]
+val head = rawblocks.take(10)
+
+判断字符串中是否包含“id_1”
+def isHeader(line: String) = line.contains("id_1")
+
+将isHead函数应用与筛选函数来判断出包含函数条件的行
+head.filter(isHeader).foreach(println)
+
+查询不包含函数条件的其余行数
+head.filterNot(isHeader).length
+
+获取去掉首行的集群rdd
+val noheader = rawblocks.filter(x => !isHeader(x))
+
+获取Array[String]  head数组中的第五个元素
+val line = head(5)
+
+将字符串用，分隔开，返回 Array[String]
+val pieces = line.split(",")
+
+
+创建抛弃“？”异常值的toDouble函数
+def toDouble(s: String) = {
+     | if ("?".equals(s)) Double.NaN else s.toDouble
+     | }
+
+创建MatchData类用于结构化的保存集群数据库中的数据，以便后期访问
+case class MatchData(id1: Int,id2: Int,scores: Array[Double], matched: Boolean)
+
+
+创建将字符串解析为MatchData类型保存的函数
+def parse(line:String)={
+     | val pieces = line.split
+     | val pieces = line.split(',')
+     | val id1 = pieces(0).toI
+     | val id1 = pieces(0).toIn
+     | val id1 = pieces(0).toInt
+     | val id2 = pieces(1).toInt
+     | val scores = pieces.slice(2,11).map(toDouble)
+     | val matched = pieces(11).toBoolean
+     | MatchData(id1,id2,scores,matched)
+     | }
+
+测试函数
+val md = parse(line)
+
+将集群示例数据转换成Array[MatchData]
+val mds = head.filter(x => !isHeader(x)).map(x => parse(x))
+
+将测试好的函数应用在集群RDD上
+val parsed = noheader.map(line => parse(line))
+
+将集群结果保存在内存中
+parsed.cache()
+
+用给入的参数分组，返回Boolean,Array[MatchData]
+val grouped = mds.groupBy(md => md.matched)
