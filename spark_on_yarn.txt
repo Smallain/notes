@@ -1,0 +1,24 @@
+idea 设置
+
+intellij中sbt设置：
+Launcher选择cunstom设置为/usr/share/sbt/bin/sbt-launch.jar
+
+
+build.sbt配置
+
+name := "Spark_learn_hadoopuser"
+
+version := "1.0"
+
+scalaVersion := "2.11.4"
+
+// https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.10
+libraryDependencies += "org.apache.spark" % "spark-core_2.11" % "2.1.1" % "compile"
+libraryDependencies += "org.apache.spark" % "spark-yarn_2.11" % "2.1.1" % "compile"
+
+
+注意spark插件的版本要与scala的版本对应上
+
+
+本地客户端启动命令
+spark-shell --master yarn --deploy-mode client

@@ -1,0 +1,25 @@
+git
+
+
+1.在github上创建repository用与备份同步文件使用，只保存开发笔记，不能存放大文件
+
+2.设置SSH KEY
+
+ssh-keygen -t rsa -C "smallainwuyuhang@163.com"
+根据提示输入密码，此密码用于远程推送到github上时使用
+
+3.创建本地git仓库
+
+在想要管理的文件夹下
+
+git init
+
+git add
+
+git commit -m "some word to flag"
+
+连接远程仓库即github上的仓库，并用 origin标示以便后期使用简单
+git remote add origin git@github.com:Smallain/notes.git
+
+推送到远程仓库标示为origin的 master 分支中
+git push -u origin master

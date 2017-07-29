@@ -1,0 +1,174 @@
+spark on yarn
+
+
+1.下载hadoop，scala，java，spark。其中hadoop要与spark的版本对应上。
+
+2.环境配置方面
+
+
+  .bashrc：
+
+
+export JAVA_HOME=/opt/java/jdk1.8.0_131
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+
+
+export HADOOP_HOME=/opt/hadoop/hadoop-2.7.3
+
+
+export SCALA_HOME=/opt/scala/scala-2.12.2
+
+export SPARK_HOME=/opt/spark/spark-2.1.1-bin-hadoop2.7
+
+export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$SCALA_HOME/bin:$SPARK_HOME/bin:$PATH
+
+
+
+3.hadoop配置文件
+
+core-site.xml
+
+<configuration>
+<property>
+	<name>fs.defaultFS</name>
+	<value>hdfs://localhost:9000</value>
+</property>
+<property>
+	<name>hadoop.tmp.dir</name>
+	<value>/opt/hadoop/hadoop-2.7.3/tmp</value>
+</property>
+</configuration>
+
+
+
+hdfs-site.xml
+
+<configuration>
+<property>
+	<name>dfs.replication</name>
+	<value>1</value>
+</property>
+</configuration>
+
+
+
+
+mapred-site.xml
+
+<configuration>
+
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+
+</configuration>
+
+
+
+yarn-site.xml
+
+
+<property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+</property>
+
+<property>
+    <name>yarn.nodemanager.pmem-check-enabled</name>
+    <value>false</value>
+</property>
+
+<property>
+    <name>yarn.nodemanager.vmem-check-enabled</name>
+    <value>false</value>
+</property>
+</configuration>
+
+
+
+4.spark配置文件设置spark-env.sh
+
+export HADOOP_CONF_DIR=/opt/hadoop/hadoop-2.7.3/etc/hadoop
+export SPARK_EXECUTOR_INSTANCES=1
+export SPARK_EXECUTOR_CORES=1
+export SPARK_EXECUTOR_MEMORY=2G
+export SPARK_DRIVER_MEMORY=2G
+
+
+
+5.初始化hadoop
+
+hdfs namenode -format
+
+6.启动hdfs
+
+./start-dfs.sh
+./start-yarn.sh
+
+7.启动spark，以client模式连接yarn
+命令需要在家目录下执行
+spark-shell --master yarn --deploy-mode client
+
+------------------------------------------------------------------------------------------------
+从hdfs集群中获取数据集返回RDD
+val rawblocks = sc.txtFile("hdfs://localhost:9000/user/hadoop/linkage")
+
+获取数据集的前10行，返回Array[String]
+val head = rawblocks.take(10)
+
+判断字符串中是否包含“id_1”
+def isHeader(line: String) = line.contains("id_1")
+
+将isHead函数应用与筛选函数来判断出包含函数条件的行
+head.filter(isHeader).foreach(println)
+
+查询不包含函数条件的其余行数
+head.filterNot(isHeader).length
+
+获取去掉首行的集群rdd
+val noheader = rawblocks.filter(x => !isHeader(x))
+
+获取Array[String]  head数组中的第五个元素
+val line = head(5)
+
+将字符串用，分隔开，返回 Array[String]
+val pieces = line.split(",")
+
+
+创建抛弃“？”异常值的toDouble函数
+def toDouble(s: String) = {
+     | if ("?".equals(s)) Double.NaN else s.toDouble
+     | }
+
+创建MatchData类用于结构化的保存集群数据库中的数据，以便后期访问
+case class MatchData(id1: Int,id2: Int,scores: Array[Double], matched: Boolean)
+
+
+创建将字符串解析为MatchData类型保存的函数
+def parse(line:String)={
+     | val pieces = line.split
+     | val pieces = line.split(',')
+     | val id1 = pieces(0).toI
+     | val id1 = pieces(0).toIn
+     | val id1 = pieces(0).toInt
+     | val id2 = pieces(1).toInt
+     | val scores = pieces.slice(2,11).map(toDouble)
+     | val matched = pieces(11).toBoolean
+     | MatchData(id1,id2,scores,matched)
+     | }
+
+测试函数
+val md = parse(line)
+
+将集群示例数据转换成Array[MatchData]
+val mds = head.filter(x => !isHeader(x)).map(x => parse(x))
+
+将测试好的函数应用在集群RDD上
+val parsed = noheader.map(line => parse(line))
+
+将集群结果保存在内存中
+parsed.cache()
+
+用给入的参数分组，返回Boolean,Array[MatchData]
+val grouped = mds.groupBy(md => md.matched)

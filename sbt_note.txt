@@ -1,0 +1,25 @@
+linux 安装sbt命令
+
+curl https://bintray.com/sbt/rpm/rpm > bintray-sbt-rpm.repo
+sudo mv bintray-sbt-rpm.repo /etc/yum.repos.d/
+sudo yum install sbt
+
+
+调整sbt下载缓慢问题
+
+修改以下两个文件
+/usr/share/sbt/conf/sbtopts
+/usr/share/sbt/conf/sbtconfig.txt
+
+这两个文件增加一行，让源生效：
+-Dsbt.override.build.repos=true
+
+新建repositories文件，添加国内源配置
+~/.sbt/repositories
+[repositories]
+local
+aliyun-nexus: http://maven.aliyun.com/nexus/content/groups/public/
+typesafe: http://repo.typesafe.com/typesafe/ivy-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext], bootOnly
+sonatype-oss-releases
+maven-central
+sonatype-oss-snapshots

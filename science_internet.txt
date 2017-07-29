@@ -1,0 +1,27 @@
+science_internet
+
+yum切换为163源
+1.备份原有的yum源
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+2.下载163国内源
+wget http://mirrors.163.com/.help/CentOS7-Base-163.repo
+
+
+下载epel-release 源
+sudo yum -y install epel-release
+
+
+下载python-pip
+yum -y install python-pip
+
+ pip install --upgrade pip
+
+
+下载shadowsocks
+
+pip install shadowsocks
+
+sslocal -s hk02-74.ssv7.net -p 44152 -b 127.0.0.1 -l 1080 -k Vasn4VV63mXM -m aes-256-cfb
+
+下载火狐插件
+FoxyProxy Standard
