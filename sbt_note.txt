@@ -6,7 +6,7 @@ sudo yum install sbt
 
 
 调整sbt下载缓慢问题
-
+/usr/share/sbt/
 修改以下两个文件
 /usr/share/sbt/conf/sbtopts
 /usr/share/sbt/conf/sbtconfig.txt

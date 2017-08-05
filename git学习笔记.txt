@@ -23,3 +23,7 @@ git remote add origin git@github.com:Smallain/notes.git
 
 推送到远程仓库标示为origin的 master 分支中
 git push -u origin master
+
+
+克隆远程仓库
+git clone +github仓库地址
